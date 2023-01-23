@@ -1,0 +1,196 @@
+{smcl}
+{com}{sf}{ul off}{txt}{.-}
+      name:  {res}<unnamed>
+       {txt}log:  {res}Z:\Desktop\untitled folder 5\logfile.smcl
+  {txt}log type:  {res}smcl
+ {txt}opened on:  {res}18 Dec 2021, 20:01:54
+
+{com}. do "C:\Users\TEMP\AppData\Local\Temp\245\STD5864_000000.tmp"
+{txt}
+{com}. use "\\tsclient\(VMFR)untitled folder 5\RHS_w1_abc.dta"
+{txt}
+{com}. append using "\\tsclient\(VMFR)untitled folder 5\RHS_w1_d.dta" "\\tsclient\(VMFR)untitled folder 5\CHIP2007_income_and_expenditure_20150408.dta"
+{txt}
+{com}. 
+. * Clean Data
+. gen married =a07
+{txt}(14,978 missing values generated)
+
+{com}. replace married=0 if a07>1
+{txt}(27,624 real changes made)
+
+{com}. gen migration = a29
+{txt}(39,306 missing values generated)
+
+{com}. replace migration=0 if a29>3
+{txt}(39,784 real changes made)
+
+{com}. replace migration=0 if a29<3
+{txt}(1,499 real changes made)
+
+{com}. gen withinsurance = a18
+{txt}(15,002 missing values generated)
+
+{com}. replace withinsurance=0 if a18>=4
+{txt}(17,658 real changes made)
+
+{com}. gen goodhealth = a13
+{txt}(15,004 missing values generated)
+
+{com}. replace goodhealth=0 if a13>1
+{txt}(16,376 real changes made)
+
+{com}. gen badhealth =a13
+{txt}(15,004 missing values generated)
+
+{com}. replace badhealth=0 if a13<2
+{txt}(30,393 real changes made)
+
+{com}. replace badhealth=0 if badhealth==.
+{txt}(15,004 real changes made)
+
+{com}. gen stoc = b02
+{txt}(22,266 missing values generated)
+
+{com}. replace stoc=0 if b02<10
+{txt}(19,746 real changes made)
+
+{com}. replace stoc=0 if stoc==.
+{txt}(22,266 real changes made)
+
+{com}. replace a08=0 if a08==.
+{txt}(26,323 real changes made)
+
+{com}. rename a08 numbchi
+{res}{txt}
+{com}. 
+. * Define Variables
+. gen totalexp = exp1+exp2+exp3+exp4+exp5+exp6+exp7+exp8
+{txt}(38,769 missing values generated)
+
+{com}. 
+. replace totalexp=0 if totalexp==.
+{txt}(38,769 real changes made)
+
+{com}. replace income_net=0 if income_net==.
+{txt}(38,769 real changes made)
+
+{com}. gen totalincome=totalexp+income_net
+{txt}
+{com}. gen savingr=(totalincome-totalexp)/totalincome
+{txt}(38,769 missing values generated)
+
+{com}. replace savingr=0 if savingr==.
+{txt}(38,769 real changes made)
+
+{com}. global xlist migration married withinsurance goodhealth badhealth stoc numbchi 
+{txt}
+{com}. 
+. * Descriptive Statistics
+. sum savingr $xlist
+
+{txt}    Variable {c |}        Obs        Mean    Std. dev.       Min        Max
+{hline 13}{c +}{hline 57}
+{space 5}savingr {c |}{res}     46,769    .0935965    .8130395  -164.6729   8.881124
+{txt}{space 3}migration {c |}{res}     46,769    .3518998    .9653423          0          3
+{txt}{space 5}married {c |}{res}     46,769    .4093523    .4917196          0          1
+{txt}withinsura~e {c |}{res}     46,769    .6365755    .5133747          0          3
+{txt}{space 2}goodhealth {c |}{res}     46,769    .6498535    .4770207          0          1
+{txt}{hline 13}{c +}{hline 57}
+{space 3}badhealth {c |}{res}     46,769    .0684855    .4021528          0          3
+{txt}{space 8}stoc {c |}{res}     46,769    .8579829    3.520166          0         26
+{txt}{space 5}numbchi {c |}{res}     46,769    .9045949    1.295274          0         12
+{txt}
+{com}. 
+. * OLS regression
+. reg savingr $xlist, robust
+
+{txt}Linear regression                               Number of obs     = {res}    46,769
+                                                {txt}F(7, 46761)       =  {res}    91.09
+                                                {txt}Prob > F          = {res}    0.0000
+                                                {txt}R-squared         = {res}    0.0279
+                                                {txt}Root MSE          =    {res} .80167
+
+{txt}{hline 14}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 15}{c |}{col 27}    Robust
+{col 1}      savingr{col 15}{c |} Coefficient{col 27}  std. err.{col 39}      t{col 47}   P>|t|{col 55}     [95% con{col 68}f. interval]
+{hline 14}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 4}migration {c |}{col 15}{res}{space 2}-.0003104{col 27}{space 2} .0000478{col 38}{space 1}   -6.50{col 47}{space 3}0.000{col 55}{space 4}-.0004041{col 68}{space 3}-.0002168
+{txt}{space 6}married {c |}{col 15}{res}{space 2}-.0017618{col 27}{space 2} .0002686{col 38}{space 1}   -6.56{col 47}{space 3}0.000{col 55}{space 4}-.0022883{col 68}{space 3}-.0012353
+{txt}withinsurance {c |}{col 15}{res}{space 2}-.0060284{col 27}{space 2} .0005297{col 38}{space 1}  -11.38{col 47}{space 3}0.000{col 55}{space 4}-.0070667{col 68}{space 3}-.0049901
+{txt}{space 3}goodhealth {c |}{col 15}{res}{space 2}-.2835846{col 27}{space 2} .0112463{col 38}{space 1}  -25.22{col 47}{space 3}0.000{col 55}{space 4}-.3056275{col 68}{space 3}-.2615418
+{txt}{space 4}badhealth {c |}{col 15}{res}{space 2} -.116649{col 27}{space 2} .0046779{col 38}{space 1}  -24.94{col 47}{space 3}0.000{col 55}{space 4}-.1258176{col 68}{space 3}-.1074803
+{txt}{space 9}stoc {c |}{col 15}{res}{space 2}-.0000382{col 27}{space 2}  .000015{col 38}{space 1}   -2.54{col 47}{space 3}0.011{col 55}{space 4}-.0000677{col 68}{space 3}-8.74e-06
+{txt}{space 6}numbchi {c |}{col 15}{res}{space 2}-.0001895{col 27}{space 2} .0001157{col 38}{space 1}   -1.64{col 47}{space 3}0.101{col 55}{space 4}-.0004162{col 68}{space 3} .0000372
+{txt}{space 8}_cons {c |}{col 15}{res}{space 2}  .290746{col 27}{space 2} .0115143{col 38}{space 1}   25.25{col 47}{space 3}0.000{col 55}{space 4} .2681777{col 68}{space 3} .3133143
+{txt}{hline 14}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{res}{txt}
+{com}. 
+. * Instrument Varaible
+. ivregress 2sls savingr married numbchi stoc withinsurance badhealth  (migration = goodhealth ), r first
+{res}
+{txt}First-stage regressions
+{hline 23}
+{res}
+{txt}{col 56}{lalign 13:Number of obs}{col 69} = {res}{ralign 7:46,769}
+{txt}{col 56}{lalign 13:F({res:6}, {res:46762})}{col 69} = {res}{ralign 7:1162.28}
+{txt}{col 56}{lalign 13:Prob > F}{col 69} = {res}{ralign 7:0.0000}
+{txt}{col 56}{lalign 13:R-squared}{col 69} = {res}{ralign 7:0.1050}
+{txt}{col 56}{lalign 13:Adj R-squared}{col 69} = {res}{ralign 7:0.1049}
+{txt}{col 56}{lalign 13:Root MSE}{col 69} = {res}{ralign 7:0.9133}
+
+{txt}{hline 14}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 15}{c |}{col 27}    Robust
+{col 1}    migration{col 15}{c |} Coefficient{col 27}  std. err.{col 39}      t{col 47}   P>|t|{col 55}     [95% con{col 68}f. interval]
+{hline 14}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 6}married {c |}{col 15}{res}{space 2}  .195431{col 27}{space 2} .0158195{col 38}{space 1}   12.35{col 47}{space 3}0.000{col 55}{space 4} .1644247{col 68}{space 3} .2264374
+{txt}{space 6}numbchi {c |}{col 15}{res}{space 2} -.172189{col 27}{space 2} .0045556{col 38}{space 1}  -37.80{col 47}{space 3}0.000{col 55}{space 4}-.1811181{col 68}{space 3}-.1632599
+{txt}{space 9}stoc {c |}{col 15}{res}{space 2} .0261057{col 27}{space 2} .0018185{col 38}{space 1}   14.36{col 47}{space 3}0.000{col 55}{space 4} .0225415{col 68}{space 3} .0296699
+{txt}withinsurance {c |}{col 15}{res}{space 2}-.0838831{col 27}{space 2}  .019449{col 38}{space 1}   -4.31{col 47}{space 3}0.000{col 55}{space 4}-.1220035{col 68}{space 3}-.0457627
+{txt}{space 4}badhealth {c |}{col 15}{res}{space 2} .2001735{col 27}{space 2} .0119746{col 38}{space 1}   16.72{col 47}{space 3}0.000{col 55}{space 4} .1767031{col 68}{space 3} .2236439
+{txt}{space 3}goodhealth {c |}{col 15}{res}{space 2} .6804387{col 27}{space 2} .0204841{col 38}{space 1}   33.22{col 47}{space 3}0.000{col 55}{space 4} .6402895{col 68}{space 3} .7205879
+{txt}{space 8}_cons {c |}{col 15}{res}{space 2} .0027661{col 27}{space 2} .0004136{col 38}{space 1}    6.69{col 47}{space 3}0.000{col 55}{space 4} .0019556{col 68}{space 3} .0035767
+{txt}{hline 14}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+
+{res}
+{txt}{col 1}Instrumental variables 2SLS regression{col 51}Number of obs{col 67}= {res}    46,769
+{txt}{col 1}{col 51}Wald chi2({res}6{txt}){col 67}= {res}    613.12
+{txt}{col 1}{col 51}Prob > chi2{col 67}= {res}    0.0000
+{txt}{col 1}{col 51}R-squared{col 67}= {res}         .
+{txt}{col 51}Root MSE{col 67}=    {res} .88737
+
+{txt}{hline 14}{c TT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{col 15}{c |}{col 27}    Robust
+{col 1}      savingr{col 15}{c |} Coefficient{col 27}  std. err.{col 39}      z{col 47}   P>|z|{col 55}     [95% con{col 68}f. interval]
+{hline 14}{c +}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{space 4}migration {c |}{col 15}{res}{space 2}-.4170778{col 27}{space 2} .0207481{col 38}{space 1}  -20.10{col 47}{space 3}0.000{col 55}{space 4}-.4577434{col 68}{space 3}-.3764122
+{txt}{space 6}married {c |}{col 15}{res}{space 2} .0796875{col 27}{space 2} .0080426{col 38}{space 1}    9.91{col 47}{space 3}0.000{col 55}{space 4} .0639242{col 68}{space 3} .0954508
+{txt}{space 6}numbchi {c |}{col 15}{res}{space 2}-.0719523{col 27}{space 2} .0038954{col 38}{space 1}  -18.47{col 47}{space 3}0.000{col 55}{space 4}-.0795871{col 68}{space 3}-.0643174
+{txt}{space 9}stoc {c |}{col 15}{res}{space 2} .0108418{col 27}{space 2} .0009354{col 38}{space 1}   11.59{col 47}{space 3}0.000{col 55}{space 4} .0090085{col 68}{space 3} .0126751
+{txt}withinsurance {c |}{col 15}{res}{space 2}-.0409882{col 27}{space 2} .0074141{col 38}{space 1}   -5.53{col 47}{space 3}0.000{col 55}{space 4}-.0555196{col 68}{space 3}-.0264567
+{txt}{space 4}badhealth {c |}{col 15}{res}{space 2}-.0332232{col 27}{space 2} .0040748{col 38}{space 1}   -8.15{col 47}{space 3}0.000{col 55}{space 4}-.0412096{col 68}{space 3}-.0252367
+{txt}{space 8}_cons {c |}{col 15}{res}{space 2} .2918988{col 27}{space 2}   .01156{col 38}{space 1}   25.25{col 47}{space 3}0.000{col 55}{space 4} .2692417{col 68}{space 3} .3145559
+{txt}{hline 14}{c BT}{hline 11}{hline 11}{hline 9}{hline 8}{hline 13}{hline 12}
+{p 0 14 3}Instrumented: {res:migration}{p_end}
+{p 0 14 3}{space 1}Instruments: {res:married numbchi stoc withinsurance badhealth goodhealth}{p_end}
+
+{com}. estat endogenous
+
+{txt}{col 3}Tests of endogeneity
+{col 3}H0: Variables are exogenous
+
+{col 3}Robust score chi2({res}1{txt}){col 35}={res}{col 37} 568.664{txt}  (p = {res}0.0000{txt})
+{col 3}Robust regression F({res}1{txt},{res}46761{txt}){col 35}={res}{col 37} 635.841{txt}  (p = {res}0.0000{txt})
+
+{com}. 
+. 
+{txt}end of do-file
+
+{com}. log close
+      {txt}name:  {res}<unnamed>
+       {txt}log:  {res}Z:\Desktop\untitled folder 5\logfile.smcl
+  {txt}log type:  {res}smcl
+ {txt}closed on:  {res}18 Dec 2021, 20:02:28
+{txt}{.-}
+{smcl}
+{txt}{sf}{ul off}
